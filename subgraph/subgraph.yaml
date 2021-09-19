@@ -1,0 +1,50 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: ProfileAuction
+    network: rinkeby
+    source:
+      address: "0xc630104af37873dd4a8ae5ca939557be023e73f3"
+      abi: ProfileAuction
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - AdminChanged
+        - BeaconUpgraded
+        - ChangedBidURI
+        - MintedProfile
+        - NewBid
+        - NewClaimableProfile
+        - RedeemProfile
+        - RemoveBid
+        - UpdateBid
+        - Upgraded
+      abis:
+        - name: ProfileAuction
+          file: ./abis/ProfileAuction.json
+      eventHandlers:
+        - event: AdminChanged(address,address)
+          handler: handleAdminChanged
+        - event: BeaconUpgraded(indexed address)
+          handler: handleBeaconUpgraded
+        - event: ChangedBidURI(address,string,string,uint256)
+          handler: handleChangedBidURI
+        - event: MintedProfile(address,string,uint256,uint256)
+          handler: handleMintedProfile
+        - event: NewBid(address,string,uint256)
+          handler: handleNewBid
+        - event: NewClaimableProfile(address,string,uint256,uint256)
+          handler: handleNewClaimableProfile
+        - event: RedeemProfile(address,string,uint256,uint256,uint256)
+          handler: handleRedeemProfile
+        - event: RemoveBid(address,string,uint256)
+          handler: handleRemoveBid
+        - event: UpdateBid(address,string,uint256,uint256)
+          handler: handleUpdateBid
+        - event: Upgraded(indexed address)
+          handler: handleUpgraded
+      file: ./src/mapping.ts
