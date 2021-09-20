@@ -1,6 +1,6 @@
-type ExampleEntity @entity {
+type Bid @entity {
   id: ID!
-  count: BigInt!
-  previousAdmin: Bytes! # address
-  newAdmin: Bytes! # address
+  user: Bytes! # address
+  val: String!
+  amount: BigInt!
 }
