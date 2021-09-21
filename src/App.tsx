@@ -9,7 +9,7 @@ import { GET_NEW_BIDS } from "./queries/get-new-bids";
 
 import type { BigNumber } from "ethers";
 import type { ProfileAuction } from "./types";
-import type { TypedEvent } from "./types/commons";
+import type { NewBidEvent } from "./types/ProfileAuction";
 
 type Bid = [BigNumber, BigNumber, string, BigNumber] & {
   _nftTokens: BigNumber;
@@ -17,14 +17,6 @@ type Bid = [BigNumber, BigNumber, string, BigNumber] & {
   _profileURI: string;
   _blockWait: BigNumber;
 };
-
-type NewBidEvent = TypedEvent<
-  [string, string, BigNumber] & {
-    _user: string;
-    _val: string;
-    _amount: BigNumber;
-  }
->;
 
 function App() {
   const { loading, error, data } = useQuery(GET_NEW_BIDS);
