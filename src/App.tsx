@@ -24,6 +24,7 @@ function App() {
   const [profileAuction, setProfileAuction] = useState<ProfileAuction>();
   const [nftTokens, setNftTokens] = useState<string>();
   const [profileUri, setProfileUri] = useState<string>();
+  const [bidsQueryAddress, setBidsQueryAddress] = useState<string>();
   const [bids, setBids] = useState<Bid[]>([]);
   const [bidsLoading, setBidsLoading] = useState(false);
   const [newBidEvents, setNewBidEvents] = useState<NewBidEvent[]>();
@@ -46,19 +47,12 @@ function App() {
     }
   }, [provider]);
 
-  const getBids = useCallback(
-    async (address: string) => {
-      if (!address) {
-        setBids([]);
-        return;
-      }
-      setBidsLoading(true);
-      const bids = await profileAuction?.getBids(address);
-      setBids(bids || []);
-      setBidsLoading(false);
-    },
-    [profileAuction]
-  );
+  const getBids = useCallback(async () => {
+    setBidsLoading(true);
+    const bids = await profileAuction?.getBids(bidsQueryAddress || "");
+    setBids(bids || []);
+    setBidsLoading(false);
+  }, [profileAuction, bidsQueryAddress]);
 
   useEffect(() => {
     const async = async () => {
@@ -95,7 +89,7 @@ function App() {
         />
       </header>
       <div className="p-3">
-        <div className="text-lg text-center">Profile Bid</div>
+        <div className="text-lg text-center">Submit Profile Bid</div>
         <div className="flex pt-3">
           <Input
             className="max-w-sm"
@@ -108,39 +102,56 @@ function App() {
             placeholder="Profile URI"
             onChange={(event) => setProfileUri(event.target.value)}
           />
-          <Button type="primary" onClick={submitProfileBid}>
+          <Button
+            type="primary"
+            onClick={submitProfileBid}
+            disabled={!nftTokens || !profileUri}
+          >
             Submit
           </Button>
         </div>
       </div>
       <div className="p-3">
         <div className="text-lg text-center">Query Bids</div>
-        <Input.Search
-          className="max-w-lg pt-3"
-          placeholder="Address"
-          enterButton="Get Bids"
-          onSearch={getBids}
-          loading={bidsLoading}
-        />
-        <Table
-          className="pt-3"
-          pagination={{ defaultPageSize: 10 }}
-          loading={bidsLoading}
-          dataSource={bids?.map(
-            ({ _nftTokens, _blockMinted, _profileURI, _blockWait }, index) => ({
-              key: index,
-              _nftTokens: _nftTokens.toString(),
-              _blockMinted: _blockMinted.toString(),
-              _profileURI,
-              _blockWait: _blockWait.toString(),
-            })
-          )}
-        >
-          <Table.Column title="NFT tokens" dataIndex="_nftTokens" />
-          <Table.Column title="Block minted" dataIndex="_blockMinted" />
-          <Table.Column title="Profile URI" dataIndex="_profileURI" />
-          <Table.Column title="Block wait" dataIndex="_blockWait" />
-        </Table>
+        <div className="flex pt-3">
+          <Input
+            className="max-w-lg"
+            placeholder="Address"
+            onChange={(event) => setBidsQueryAddress(event.target.value)}
+          />
+          <Button
+            type="primary"
+            disabled={!bidsQueryAddress}
+            onClick={getBids}
+            loading={bidsLoading}
+          >
+            Query
+          </Button>
+        </div>
+        {bids.length > 0 && (
+          <Table
+            className="pt-3"
+            pagination={{ defaultPageSize: 10 }}
+            loading={bidsLoading}
+            dataSource={bids?.map(
+              (
+                { _nftTokens, _blockMinted, _profileURI, _blockWait },
+                index
+              ) => ({
+                key: index,
+                _nftTokens: _nftTokens.toString(),
+                _blockMinted: _blockMinted.toString(),
+                _profileURI,
+                _blockWait: _blockWait.toString(),
+              })
+            )}
+          >
+            <Table.Column title="NFT tokens" dataIndex="_nftTokens" />
+            <Table.Column title="Block minted" dataIndex="_blockMinted" />
+            <Table.Column title="Profile URI" dataIndex="_profileURI" />
+            <Table.Column title="Block wait" dataIndex="_blockWait" />
+          </Table>
+        )}
       </div>
       <div className="p-3">
         <div className="text-lg text-center">NewBid Events</div>
