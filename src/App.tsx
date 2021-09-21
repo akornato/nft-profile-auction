@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@apollo/client";
 import { Contract } from "ethers";
-import { Input, Table } from "antd";
+import { Button, Input, Table } from "antd";
 import { WalletButton } from "./components/WalletButton";
 import { useWeb3Modal } from "./hooks/useWeb3Modal";
 import { addresses, abis } from "./contracts";
@@ -22,7 +22,9 @@ function App() {
   const { loading, error, data } = useQuery(GET_NEW_BIDS);
   const { provider, loadWeb3Modal, logoutOfWeb3Modal } = useWeb3Modal();
   const [profileAuction, setProfileAuction] = useState<ProfileAuction>();
-  const [bids, setBids] = useState<Bid[]>();
+  const [nftTokens, setNftTokens] = useState<string>();
+  const [profileUri, setProfileUri] = useState<string>();
+  const [bids, setBids] = useState<Bid[]>([]);
   const [bidsLoading, setBidsLoading] = useState(false);
   const [newBidEvents, setNewBidEvents] = useState<NewBidEvent[]>();
   const [newBidEventsLoading, setNewBidEventsLoading] = useState(false);
@@ -46,9 +48,13 @@ function App() {
 
   const getBids = useCallback(
     async (address: string) => {
+      if (!address) {
+        setBids([]);
+        return;
+      }
       setBidsLoading(true);
       const bids = await profileAuction?.getBids(address);
-      setBids(bids);
+      setBids(bids || []);
       setBidsLoading(false);
     },
     [profileAuction]
@@ -67,6 +73,17 @@ function App() {
     async();
   }, [profileAuction]);
 
+  const submitProfileBid = async () => {
+    if (provider && profileAuction) {
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      const tx = await profileAuction
+        .connect(signer)
+        .submitProfileBid(parseInt(nftTokens || ""), profileUri || "");
+      await tx.wait();
+    }
+  };
+
   return (
     <div>
       <header className="flex justify-between items-center bg-blue-900 p-3">
@@ -78,11 +95,29 @@ function App() {
         />
       </header>
       <div className="p-3">
+        <div className="text-lg text-center">Profile Bid</div>
+        <div className="flex pt-3">
+          <Input
+            className="max-w-sm"
+            placeholder="NFT tokens"
+            value={nftTokens}
+            onChange={(event) => setNftTokens(event.target.value)}
+          />
+          <Input
+            className="max-w-sm"
+            placeholder="Profile URI"
+            onChange={(event) => setProfileUri(event.target.value)}
+          />
+          <Button type="primary" onClick={submitProfileBid}>
+            Submit
+          </Button>
+        </div>
+      </div>
+      <div className="p-3">
         <div className="text-lg text-center">Query Bids</div>
         <Input.Search
           className="max-w-lg pt-3"
           placeholder="Address"
-          defaultValue="0x59495589849423692778a8c5aaca62ca80f875a4"
           enterButton="Get Bids"
           onSearch={getBids}
           loading={bidsLoading}
@@ -124,7 +159,7 @@ function App() {
           )}
         >
           <Table.Column title="Block #" dataIndex="blockNumber" />
-          <Table.Column title="Amount" dataIndex="_amount" />
+          <Table.Column title="NFT tokens" dataIndex="_amount" />
           <Table.Column title="User" dataIndex="_user" />
           <Table.Column title="Val" dataIndex="_val" />
         </Table>
