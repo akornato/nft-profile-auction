@@ -31,17 +31,14 @@ function App() {
   }, [loading, error, data]);
 
   useEffect(() => {
-    const async = async () => {
-      if (provider) {
-        const profileAuction = new Contract(
-          addresses.profileAuction,
-          abis.profileAuction,
-          provider
-        ) as ProfileAuction;
-        setProfileAuction(profileAuction);
-      }
-    };
-    async();
+    if (provider) {
+      const profileAuction = new Contract(
+        addresses.profileAuction,
+        abis.profileAuction,
+        provider
+      ) as ProfileAuction;
+      setProfileAuction(profileAuction);
+    }
   }, [provider]);
 
   const getBids = useCallback(
