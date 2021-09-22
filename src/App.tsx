@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@apollo/client";
-import { Contract } from "ethers";
+import { ethers, Contract } from "ethers";
 import { Button, Input, Table } from "antd";
 import { WalletButton } from "./components/WalletButton";
 import { useWeb3Modal } from "./hooks/useWeb3Modal";
@@ -8,7 +8,7 @@ import { addresses, abis } from "./contracts";
 import { GET_NEW_BIDS } from "./queries/get-new-bids";
 
 import type { BigNumber } from "ethers";
-import type { ProfileAuction } from "./types";
+import type { ProfileAuction, NftToken } from "./types";
 import type { NewBidEvent } from "./types/ProfileAuction";
 
 type Bid = [BigNumber, BigNumber, string, BigNumber] & {
@@ -21,9 +21,13 @@ type Bid = [BigNumber, BigNumber, string, BigNumber] & {
 function App() {
   const { loading, error, data } = useQuery(GET_NEW_BIDS);
   const { provider, loadWeb3Modal, logoutOfWeb3Modal } = useWeb3Modal();
+  const [account, setAccount] = useState<string>();
+  const [ethBalance, setEthBalance] = useState<string>();
+  const [, setNftToken] = useState<NftToken>();
+  const [nftTokenBalance, setNftTokenBalance] = useState<string>();
   const [profileAuction, setProfileAuction] = useState<ProfileAuction>();
-  const [nftTokens, setNftTokens] = useState<string>();
-  const [profileUri, setProfileUri] = useState<string>();
+  const [nftTokenBid, setNftTokenBid] = useState<string>();
+  const [profileUriBid, setProfileUriBid] = useState<string>();
   const [bidsQueryAddress, setBidsQueryAddress] = useState<string>();
   const [bids, setBids] = useState<Bid[]>([]);
   const [bidsLoading, setBidsLoading] = useState(false);
@@ -37,14 +41,36 @@ function App() {
   }, [loading, error, data]);
 
   useEffect(() => {
-    if (provider) {
-      const profileAuction = new Contract(
-        addresses.profileAuction,
-        abis.profileAuction,
-        provider
-      ) as ProfileAuction;
-      setProfileAuction(profileAuction);
-    }
+    const async = async () => {
+      if (provider) {
+        const account = (await provider.listAccounts())[0];
+        setAccount(account);
+        const ethBalance = await provider.getBalance(account);
+        setEthBalance(ethers.utils.formatEther(ethBalance));
+        const profileAuction = new Contract(
+          addresses.profileAuction,
+          abis.profileAuction,
+          provider
+        ) as ProfileAuction;
+        setProfileAuction(profileAuction);
+        const filter = profileAuction.filters.NewBid();
+        if (filter) {
+          setNewBidEventsLoading(true);
+          const newBidEvents = await profileAuction?.queryFilter(filter);
+          setNewBidEvents(newBidEvents);
+          setNewBidEventsLoading(false);
+        }
+        const nftToken = new Contract(
+          addresses.nftToken,
+          abis.nftToken,
+          provider
+        ) as NftToken;
+        setNftToken(nftToken);
+        const nftTokenBalance = await nftToken.balanceOf(account);
+        setNftTokenBalance(nftTokenBalance.toString());
+      }
+    };
+    async();
   }, [provider]);
 
   const getBids = useCallback(async () => {
@@ -54,26 +80,13 @@ function App() {
     setBidsLoading(false);
   }, [profileAuction, bidsQueryAddress]);
 
-  useEffect(() => {
-    const async = async () => {
-      const filter = profileAuction?.filters.NewBid();
-      if (filter) {
-        setNewBidEventsLoading(true);
-        const newBidEvents = await profileAuction?.queryFilter(filter);
-        setNewBidEvents(newBidEvents);
-        setNewBidEventsLoading(false);
-      }
-    };
-    async();
-  }, [profileAuction]);
-
   const submitProfileBid = async () => {
     if (provider && profileAuction) {
       await provider.send("eth_requestAccounts", []);
       const signer = provider.getSigner();
       const tx = await profileAuction
         .connect(signer)
-        .submitProfileBid(parseInt(nftTokens || ""), profileUri || "");
+        .submitProfileBid(parseInt(nftTokenBid || ""), profileUriBid || "");
       await tx.wait();
     }
   };
@@ -82,11 +95,22 @@ function App() {
     <div>
       <header className="flex justify-between items-center bg-blue-900 p-3">
         <div className="text-lg text-white">NFT Profile Auction</div>
-        <WalletButton
-          provider={provider}
-          loadWeb3Modal={loadWeb3Modal}
-          logoutOfWeb3Modal={logoutOfWeb3Modal}
-        />
+        <div className="flex items-center">
+          {nftTokenBalance && (
+            <div className="pr-3 text-white">
+              NFT Token Balance: {nftTokenBalance}
+            </div>
+          )}
+          {ethBalance && (
+            <div className="pr-3 text-white">ETH Balance: {ethBalance}</div>
+          )}
+          <WalletButton
+            provider={provider}
+            account={account}
+            loadWeb3Modal={loadWeb3Modal}
+            logoutOfWeb3Modal={logoutOfWeb3Modal}
+          />
+        </div>
       </header>
       <div className="p-3">
         <div className="text-lg text-center">Submit Profile Bid</div>
@@ -94,18 +118,19 @@ function App() {
           <Input
             className="max-w-sm"
             placeholder="NFT tokens"
-            value={nftTokens}
-            onChange={(event) => setNftTokens(event.target.value)}
+            value={nftTokenBid}
+            onChange={(event) => setNftTokenBid(event.target.value)}
           />
           <Input
             className="max-w-sm"
             placeholder="Profile URI"
-            onChange={(event) => setProfileUri(event.target.value)}
+            value={profileUriBid}
+            onChange={(event) => setProfileUriBid(event.target.value)}
           />
           <Button
             type="primary"
             onClick={submitProfileBid}
-            disabled={!nftTokens || !profileUri}
+            disabled={!nftTokenBid || !profileUriBid}
           >
             Submit
           </Button>
