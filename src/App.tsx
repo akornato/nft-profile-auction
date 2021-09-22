@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import { useQuery } from "@apollo/client";
+// import { useQuery } from "@apollo/client";
 import { ethers, Contract } from "ethers";
 import { Button, Input, Table } from "antd";
 import { WalletButton } from "./components/WalletButton";
 import { useWeb3Modal } from "./hooks/useWeb3Modal";
 import { addresses, abis } from "./contracts";
-import { GET_NEW_BIDS } from "./queries/get-new-bids";
+// import { GET_NEW_BIDS } from "./queries/get-new-bids";
 
 import type { BigNumber } from "ethers";
 import type { ProfileAuction, NftToken } from "./types";
@@ -19,7 +19,7 @@ type Bid = [BigNumber, BigNumber, string, BigNumber] & {
 };
 
 function App() {
-  const { loading, error, data } = useQuery(GET_NEW_BIDS);
+  // const { loading, error, data } = useQuery(GET_NEW_BIDS);
   const { provider, loadWeb3Modal, logoutOfWeb3Modal } = useWeb3Modal();
   const [account, setAccount] = useState<string>();
   const [ethBalance, setEthBalance] = useState<string>();
@@ -33,12 +33,6 @@ function App() {
   const [bidsLoading, setBidsLoading] = useState(false);
   const [newBidEvents, setNewBidEvents] = useState<NewBidEvent[]>();
   const [newBidEventsLoading, setNewBidEventsLoading] = useState(false);
-
-  useEffect(() => {
-    if (!loading && !error) {
-      console.log({ transfers: data?.transfers });
-    }
-  }, [loading, error, data]);
 
   useEffect(() => {
     const async = async () => {
@@ -67,7 +61,7 @@ function App() {
         ) as NftToken;
         setNftToken(nftToken);
         const nftTokenBalance = await nftToken.balanceOf(account);
-        setNftTokenBalance(nftTokenBalance.toString());
+        setNftTokenBalance(ethers.utils.formatEther(nftTokenBalance));
       }
     };
     async();
@@ -86,7 +80,10 @@ function App() {
       const signer = provider.getSigner();
       const tx = await profileAuction
         .connect(signer)
-        .submitProfileBid(parseInt(nftTokenBid || ""), profileUriBid || "");
+        .submitProfileBid(
+          ethers.utils.parseEther(nftTokenBid || ""),
+          profileUriBid || ""
+        );
       await tx.wait();
     }
   };
@@ -113,7 +110,6 @@ function App() {
         </div>
       </header>
       <div className="p-3">
-        <div className="text-lg text-center">Submit Profile Bid</div>
         <div className="flex pt-3">
           <Input
             className="max-w-sm"
@@ -132,13 +128,12 @@ function App() {
             onClick={submitProfileBid}
             disabled={!nftTokenBid || !profileUriBid}
           >
-            Submit
+            Submit Profile Bid
           </Button>
         </div>
       </div>
       <div className="p-3">
-        <div className="text-lg text-center">Query Bids</div>
-        <div className="flex pt-3">
+        <div className="flex">
           <Input
             className="max-w-lg"
             placeholder="Address"
@@ -150,12 +145,12 @@ function App() {
             onClick={getBids}
             loading={bidsLoading}
           >
-            Query
+            Query Bids
           </Button>
         </div>
         {bids.length > 0 && (
           <Table
-            className="pt-3"
+            className="pt-5"
             pagination={{ defaultPageSize: 10 }}
             loading={bidsLoading}
             dataSource={bids?.map(
@@ -164,7 +159,7 @@ function App() {
                 index
               ) => ({
                 key: index,
-                _nftTokens: _nftTokens.toString(),
+                _nftTokens: ethers.utils.formatEther(_nftTokens),
                 _blockMinted: _blockMinted.toString(),
                 _profileURI,
                 _blockWait: _blockWait.toString(),
@@ -188,7 +183,7 @@ function App() {
             ({ blockNumber, args: { _amount, _user, _val } }, index) => ({
               key: index,
               blockNumber,
-              _amount: _amount.toString(),
+              _amount: ethers.utils.formatEther(_amount),
               _user,
               _val,
             })
