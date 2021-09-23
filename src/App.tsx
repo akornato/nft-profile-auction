@@ -11,6 +11,8 @@ import type { BigNumber } from "ethers";
 import type { ProfileAuction, NftToken } from "./types";
 import type { NewBidEvent } from "./types/ProfileAuction";
 
+const { parseEther, formatEther } = ethers.utils;
+
 type Bid = [BigNumber, BigNumber, string, BigNumber] & {
   _nftTokens: BigNumber;
   _blockMinted: BigNumber;
@@ -62,12 +64,12 @@ function App() {
         ) as NftToken;
         setNftToken(nftToken);
         const nftTokenBalance = await nftToken.balanceOf(account);
-        setNftTokenBalance(ethers.utils.formatEther(nftTokenBalance));
+        setNftTokenBalance(formatEther(nftTokenBalance));
         const allowance = await nftToken.allowance(
           account,
           profileAuction.address
         );
-        setAllowance(ethers.utils.formatEther(allowance));
+        setAllowance(formatEther(allowance));
       }
     };
     async();
@@ -88,11 +90,9 @@ function App() {
       try {
         const tx = await nftToken
           .connect(signer)
-          .approve(
-            profileAuction.address,
-            ethers.utils.parseEther(newAllowance || "")
-          );
+          .approve(profileAuction.address, parseEther(newAllowance || ""));
         await tx.wait();
+        setAllowance(formatEther(parseEther(newAllowance || "")));
       } catch (e: any) {
         console.log(e.message);
       }
@@ -109,7 +109,7 @@ function App() {
         const tx = await profileAuction
           .connect(signer)
           .submitProfileBid(
-            ethers.utils.parseEther(nftTokenBid || ""),
+            parseEther(nftTokenBid || ""),
             profileUriBid || "",
             { gasLimit: 210000 }
           );
@@ -209,7 +209,7 @@ function App() {
                 index
               ) => ({
                 key: index,
-                _nftTokens: ethers.utils.formatEther(_nftTokens),
+                _nftTokens: formatEther(_nftTokens),
                 _blockMinted: _blockMinted.toString(),
                 _profileURI,
                 _blockWait: _blockWait.toString(),
@@ -233,7 +233,7 @@ function App() {
             ({ blockNumber, args: { _amount, _user, _val } }, index) => ({
               key: index,
               blockNumber,
-              _amount: ethers.utils.formatEther(_amount),
+              _amount: formatEther(_amount),
               _user,
               _val,
             })
