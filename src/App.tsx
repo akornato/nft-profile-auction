@@ -21,7 +21,6 @@ type Bid = [BigNumber, BigNumber, string, BigNumber] & {
 function App() {
   // const { loading, error, data } = useQuery(GET_NEW_BIDS);
   const { provider, loadWeb3Modal, logoutOfWeb3Modal } = useWeb3Modal();
-  const [submitProfileBidError, setSubmitProfileBidError] = useState<string>();
   const [account, setAccount] = useState<string>();
   const [ethBalance, setEthBalance] = useState<string>();
   const [nftToken, setNftToken] = useState<NftToken>();
@@ -29,7 +28,6 @@ function App() {
   const [allowance, setAllowance] = useState<string>();
   const [newAllowance, setNewAllowance] = useState<string>();
   const [approveAllowanceLoading, setApproveAllowanceLoading] = useState(false);
-  const [approveAllowanceError, setApproveAllowanceError] = useState<string>();
   const [profileAuction, setProfileAuction] = useState<ProfileAuction>();
   const [nftTokenBid, setNftTokenBid] = useState<string>();
   const [profileUriBid, setProfileUriBid] = useState<string>();
@@ -86,7 +84,6 @@ function App() {
   }, [profileAuction, bidsQueryAddress]);
 
   const approveAllowance = async () => {
-    setApproveAllowanceError("");
     if (provider && nftToken && profileAuction) {
       await provider.send("eth_requestAccounts", []);
       const signer = provider.getSigner();
@@ -100,14 +97,13 @@ function App() {
           );
         await tx.wait();
       } catch (e: any) {
-        setApproveAllowanceError(e.message);
+        console.log(e.message);
       }
       setApproveAllowanceLoading(false);
     }
   };
 
   const submitProfileBid = async () => {
-    setSubmitProfileBidError("");
     if (provider && profileAuction) {
       await provider.send("eth_requestAccounts", []);
       const signer = provider.getSigner();
@@ -122,7 +118,7 @@ function App() {
           );
         await tx.wait();
       } catch (e: any) {
-        setSubmitProfileBidError(e.message);
+        console.log(e.message);
       }
       setSubmitProfileBidLoading(false);
     }
@@ -167,11 +163,6 @@ function App() {
           </Button>
           <div className="pl-3">Now: {allowance}</div>
         </div>
-        {approveAllowanceError && (
-          <div className="pt-3 text-red-500 break-all">
-            {approveAllowanceError}
-          </div>
-        )}
       </div>
       <div className="p-3">
         <div className="flex">
@@ -196,11 +187,6 @@ function App() {
             Submit Profile Bid
           </Button>
         </div>
-        {submitProfileBidError && (
-          <div className="pt-3 text-red-500 break-all">
-            {submitProfileBidError}
-          </div>
-        )}
       </div>
       <div className="p-3">
         <div className="flex">
