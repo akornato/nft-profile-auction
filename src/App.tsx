@@ -143,7 +143,7 @@ function App() {
           </Button>
         </div>
         {submitProfileBidError ? (
-          <div className="pt-3 text-red-500">{submitProfileBidError}</div>
+          <div className="pt-3 text-red-500 break-all">{submitProfileBidError}</div>
         ) : null}
       </div>
       <div className="p-3">
