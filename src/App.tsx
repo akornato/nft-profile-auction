@@ -135,6 +135,15 @@ function App() {
       const signer = provider.getSigner();
       setSubmitProfileBidLoading(true);
       try {
+        const bids = await profileAuction?.getBids(account || "");
+        if (bids.find(({ _profileURI }) => _profileURI === profileUriBid)) {
+          notification.open({
+            key: `${profileUriBid}`,
+            message: `You already have a bid for "${profileUriBid}" profile.`,
+          });
+          setSubmitProfileBidLoading(false);
+          return;
+        }
         const tx = await profileAuction
           .connect(signer)
           .submitProfileBid(
@@ -232,23 +241,14 @@ function App() {
             className="pt-5"
             pagination={{ defaultPageSize: 10 }}
             loading={bidsLoading}
-            dataSource={bids?.map(
-              (
-                { _nftTokens, _blockMinted, _profileURI, _blockWait },
-                index
-              ) => ({
-                key: index,
-                _nftTokens: formatEther(_nftTokens),
-                _blockMinted: _blockMinted.toString(),
-                _profileURI,
-                _blockWait: _blockWait.toString(),
-              })
-            )}
+            dataSource={bids?.map(({ _nftTokens, _profileURI }, index) => ({
+              key: index,
+              _nftTokens: formatEther(_nftTokens),
+              _profileURI,
+            }))}
           >
             <Table.Column title="NFT tokens" dataIndex="_nftTokens" />
-            <Table.Column title="Block minted" dataIndex="_blockMinted" />
             <Table.Column title="Profile URI" dataIndex="_profileURI" />
-            <Table.Column title="Block wait" dataIndex="_blockWait" />
           </Table>
         )}
       </div>
