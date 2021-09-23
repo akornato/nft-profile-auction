@@ -259,7 +259,7 @@ function App() {
           loading={newBidEventsLoading}
           onClick={loadNewBidEvents}
         >
-          Update NewBid Events
+          Reload NewBid Events
         </Button>
         <Table
           className="pt-3"
