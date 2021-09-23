@@ -24,8 +24,11 @@ function App() {
   const [submitProfileBidError, setSubmitProfileBidError] = useState<string>();
   const [account, setAccount] = useState<string>();
   const [ethBalance, setEthBalance] = useState<string>();
-  const [, setNftToken] = useState<NftToken>();
+  const [nftToken, setNftToken] = useState<NftToken>();
   const [nftTokenBalance, setNftTokenBalance] = useState<string>();
+  const [newAllowance, setNewAllowance] = useState<string>();
+  const [approveAllowanceLoading, setApproveAllowanceLoading] = useState(false);
+  const [approveAllowanceError, setApproveAllowanceError] = useState<string>();
   const [profileAuction, setProfileAuction] = useState<ProfileAuction>();
   const [nftTokenBid, setNftTokenBid] = useState<string>();
   const [profileUriBid, setProfileUriBid] = useState<string>();
@@ -76,6 +79,27 @@ function App() {
     setBidsLoading(false);
   }, [profileAuction, bidsQueryAddress]);
 
+  const approveAllowance = async () => {
+    setApproveAllowanceError("");
+    if (provider && nftToken && profileAuction) {
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      setApproveAllowanceLoading(true);
+      try {
+        const tx = await nftToken
+          .connect(signer)
+          .approve(
+            profileAuction.address,
+            ethers.utils.parseEther(newAllowance || "")
+          );
+        await tx.wait();
+      } catch (e: any) {
+        setApproveAllowanceError(e.message);
+      }
+      setApproveAllowanceLoading(false);
+    }
+  };
+
   const submitProfileBid = async () => {
     setSubmitProfileBidError("");
     if (provider && profileAuction) {
@@ -124,6 +148,29 @@ function App() {
           <Input
             className="max-w-sm"
             placeholder="NFT tokens"
+            value={newAllowance}
+            onChange={(event) => setNewAllowance(event.target.value)}
+          />
+          <Button
+            type="primary"
+            onClick={approveAllowance}
+            disabled={!newAllowance}
+            loading={approveAllowanceLoading}
+          >
+            Approve Allowance
+          </Button>
+        </div>
+        {approveAllowanceError && (
+          <div className="pt-3 text-red-500 break-all">
+            {approveAllowanceError}
+          </div>
+        )}
+      </div>
+      <div className="p-3">
+        <div className="flex">
+          <Input
+            className="max-w-sm"
+            placeholder="NFT tokens"
             value={nftTokenBid}
             onChange={(event) => setNftTokenBid(event.target.value)}
           />
@@ -142,9 +189,11 @@ function App() {
             Submit Profile Bid
           </Button>
         </div>
-        {submitProfileBidError ? (
-          <div className="pt-3 text-red-500 break-all">{submitProfileBidError}</div>
-        ) : null}
+        {submitProfileBidError && (
+          <div className="pt-3 text-red-500 break-all">
+            {submitProfileBidError}
+          </div>
+        )}
       </div>
       <div className="p-3">
         <div className="flex">
