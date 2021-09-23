@@ -111,7 +111,7 @@ function App() {
           .submitProfileBid(
             parseEther(nftTokenBid || ""),
             profileUriBid || "",
-            { gasLimit: 210000 }
+            { gasLimit: 300000 }
           );
         await tx.wait();
       } catch (e: any) {
