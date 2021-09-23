@@ -155,7 +155,7 @@ function App() {
           >
             Approve Allowance
           </Button>
-          <div className="pl-3">Now: {allowance}</div>
+          {allowance && <div className="pl-3">Now: {allowance}</div>}
         </div>
       </div>
       <div className="p-3">
