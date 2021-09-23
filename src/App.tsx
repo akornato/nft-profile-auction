@@ -244,15 +244,15 @@ function App() {
           className="pt-3"
           pagination={{ defaultPageSize: 10 }}
           loading={newBidEventsLoading}
-          dataSource={newBidEvents?.map(
-            ({ blockNumber, args: { _amount, _user, _val } }, index) => ({
+          dataSource={newBidEvents
+            ?.map(({ blockNumber, args: { _amount, _user, _val } }, index) => ({
               key: index,
               blockNumber,
               _amount: formatEther(_amount),
               _user,
               _val,
-            })
-          )}
+            }))
+            .sort(({ blockNumber: a }, { blockNumber: b }) => b - a)}
         >
           <Table.Column title="Block #" dataIndex="blockNumber" />
           <Table.Column title="NFT tokens" dataIndex="_amount" />
