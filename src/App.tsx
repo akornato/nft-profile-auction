@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 // import { useQuery } from "@apollo/client";
+import { notification } from "antd";
 import { ethers, Contract } from "ethers";
 import { Button, Input, Table } from "antd";
 import { WalletButton } from "./components/WalletButton";
@@ -39,6 +40,19 @@ function App() {
   const [newBidEvents, setNewBidEvents] = useState<NewBidEvent[]>();
   const [newBidEventsLoading, setNewBidEventsLoading] = useState(false);
 
+  const newBidListener = useCallback(
+    (_user: string, _val: string, _amount: BigNumber) => {
+      notification.open({
+        key: `${_user}|${_val}|${_amount}`,
+        message: "New Bid",
+        description: `User: ${_user} | Value: ${ethers.utils.formatEther(
+          _amount
+        )} NFT | Profile: ${_val}`,
+      });
+    },
+    []
+  );
+
   useEffect(() => {
     const async = async () => {
       if (provider) {
@@ -57,6 +71,7 @@ function App() {
           setNewBidEvents(newBidEvents);
           setNewBidEventsLoading(false);
         }
+        profileAuction.on("NewBid", newBidListener);
         const nftToken = new Contract(
           addresses.nftToken,
           abis.nftToken,
