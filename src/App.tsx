@@ -39,6 +39,26 @@ function App() {
   const [bidsLoading, setBidsLoading] = useState(false);
   const [newBidEvents, setNewBidEvents] = useState<NewBidEvent[]>();
   const [newBidEventsLoading, setNewBidEventsLoading] = useState(false);
+  const [newBidEventsOutdated, setNewBidEventsOutdated] = useState(false);
+
+  const loadNewBidEvents = useCallback(async () => {
+    if (profileAuction) {
+      const filter = profileAuction.filters.NewBid();
+      if (filter) {
+        setNewBidEventsLoading(true);
+        const newBidEvents = await profileAuction?.queryFilter(filter);
+        setNewBidEvents(newBidEvents);
+        setNewBidEventsLoading(false);
+        setNewBidEventsOutdated(false);
+      }
+    }
+  }, [profileAuction]);
+
+  useEffect(() => {
+    if (profileAuction) {
+      loadNewBidEvents();
+    }
+  }, [profileAuction, loadNewBidEvents]);
 
   const newBidListener = useCallback(
     (_user: string, _val: string, _amount: BigNumber) => {
@@ -49,6 +69,7 @@ function App() {
           _amount
         )} NFT | Profile: ${_val}`,
       });
+      setNewBidEventsOutdated(true);
     },
     []
   );
@@ -64,13 +85,6 @@ function App() {
           provider
         ) as ProfileAuction;
         setProfileAuction(profileAuction);
-        const filter = profileAuction.filters.NewBid();
-        if (filter) {
-          setNewBidEventsLoading(true);
-          const newBidEvents = await profileAuction?.queryFilter(filter);
-          setNewBidEvents(newBidEvents);
-          setNewBidEventsLoading(false);
-        }
         profileAuction.on("NewBid", newBidListener);
         const nftToken = new Contract(
           addresses.nftToken,
@@ -88,7 +102,7 @@ function App() {
       }
     };
     async();
-  }, [provider]);
+  }, [provider, newBidListener]);
 
   const getBids = useCallback(async () => {
     setBidsLoading(true);
@@ -239,7 +253,14 @@ function App() {
         )}
       </div>
       <div className="p-3">
-        <div className="text-lg text-center">NewBid Events</div>
+        <Button
+          type="primary"
+          disabled={!newBidEventsOutdated}
+          loading={newBidEventsLoading}
+          onClick={loadNewBidEvents}
+        >
+          Update NewBid Events
+        </Button>
         <Table
           className="pt-3"
           pagination={{ defaultPageSize: 10 }}
