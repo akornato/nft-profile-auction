@@ -26,6 +26,7 @@ function App() {
   const [ethBalance, setEthBalance] = useState<string>();
   const [nftToken, setNftToken] = useState<NftToken>();
   const [nftTokenBalance, setNftTokenBalance] = useState<string>();
+  const [allowance, setAllowance] = useState<string>();
   const [newAllowance, setNewAllowance] = useState<string>();
   const [approveAllowanceLoading, setApproveAllowanceLoading] = useState(false);
   const [approveAllowanceError, setApproveAllowanceError] = useState<string>();
@@ -67,6 +68,11 @@ function App() {
         setNftToken(nftToken);
         const nftTokenBalance = await nftToken.balanceOf(account);
         setNftTokenBalance(ethers.utils.formatEther(nftTokenBalance));
+        const allowance = await nftToken.allowance(
+          account,
+          profileAuction.address
+        );
+        setAllowance(ethers.utils.formatEther(allowance));
       }
     };
     async();
@@ -144,7 +150,7 @@ function App() {
         </div>
       </header>
       <div className="p-3">
-        <div className="flex pt-3">
+        <div className="flex items-center pt-3">
           <Input
             className="max-w-sm"
             placeholder="NFT tokens"
@@ -159,6 +165,7 @@ function App() {
           >
             Approve Allowance
           </Button>
+          <div className="pl-3">Now: {allowance}</div>
         </div>
         {approveAllowanceError && (
           <div className="pt-3 text-red-500 break-all">
