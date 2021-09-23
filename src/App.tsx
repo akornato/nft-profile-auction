@@ -22,7 +22,6 @@ function App() {
   // const { loading, error, data } = useQuery(GET_NEW_BIDS);
   const { provider, loadWeb3Modal, logoutOfWeb3Modal } = useWeb3Modal();
   const [account, setAccount] = useState<string>();
-  const [ethBalance, setEthBalance] = useState<string>();
   const [nftToken, setNftToken] = useState<NftToken>();
   const [nftTokenBalance, setNftTokenBalance] = useState<string>();
   const [allowance, setAllowance] = useState<string>();
@@ -43,8 +42,6 @@ function App() {
       if (provider) {
         const account = (await provider.listAccounts())[0];
         setAccount(account);
-        const ethBalance = await provider.getBalance(account);
-        setEthBalance(ethers.utils.formatEther(ethBalance));
         const profileAuction = new Contract(
           addresses.profileAuction,
           abis.profileAuction,
@@ -133,9 +130,6 @@ function App() {
             <div className="pr-3 text-white">
               NFT Token Balance: {nftTokenBalance}
             </div>
-          )}
-          {ethBalance && (
-            <div className="pr-3 text-white">ETH Balance: {ethBalance}</div>
           )}
           <WalletButton
             provider={provider}
