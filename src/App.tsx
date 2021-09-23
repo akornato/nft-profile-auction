@@ -21,6 +21,7 @@ type Bid = [BigNumber, BigNumber, string, BigNumber] & {
 function App() {
   // const { loading, error, data } = useQuery(GET_NEW_BIDS);
   const { provider, loadWeb3Modal, logoutOfWeb3Modal } = useWeb3Modal();
+  const [submitProfileBidError, setSubmitProfileBidError] = useState<string>();
   const [account, setAccount] = useState<string>();
   const [ethBalance, setEthBalance] = useState<string>();
   const [, setNftToken] = useState<NftToken>();
@@ -28,6 +29,7 @@ function App() {
   const [profileAuction, setProfileAuction] = useState<ProfileAuction>();
   const [nftTokenBid, setNftTokenBid] = useState<string>();
   const [profileUriBid, setProfileUriBid] = useState<string>();
+  const [submitProfileBidLoading, setSubmitProfileBidLoading] = useState(false);
   const [bidsQueryAddress, setBidsQueryAddress] = useState<string>();
   const [bids, setBids] = useState<Bid[]>([]);
   const [bidsLoading, setBidsLoading] = useState(false);
@@ -75,16 +77,24 @@ function App() {
   }, [profileAuction, bidsQueryAddress]);
 
   const submitProfileBid = async () => {
+    setSubmitProfileBidError("");
     if (provider && profileAuction) {
       await provider.send("eth_requestAccounts", []);
       const signer = provider.getSigner();
-      const tx = await profileAuction
-        .connect(signer)
-        .submitProfileBid(
-          ethers.utils.parseEther(nftTokenBid || ""),
-          profileUriBid || ""
-        );
-      await tx.wait();
+      setSubmitProfileBidLoading(true);
+      try {
+        const tx = await profileAuction
+          .connect(signer)
+          .submitProfileBid(
+            ethers.utils.parseEther(nftTokenBid || ""),
+            profileUriBid || "",
+            { gasLimit: 210000 }
+          );
+        await tx.wait();
+      } catch (e: any) {
+        setSubmitProfileBidError(e.message);
+      }
+      setSubmitProfileBidLoading(false);
     }
   };
 
@@ -127,10 +137,14 @@ function App() {
             type="primary"
             onClick={submitProfileBid}
             disabled={!nftTokenBid || !profileUriBid}
+            loading={submitProfileBidLoading}
           >
             Submit Profile Bid
           </Button>
         </div>
+        {submitProfileBidError ? (
+          <div className="pt-3 text-red-500">{submitProfileBidError}</div>
+        ) : null}
       </div>
       <div className="p-3">
         <div className="flex">
