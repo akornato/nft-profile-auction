@@ -21,6 +21,16 @@ type Bid = [BigNumber, BigNumber, string, BigNumber] & {
   _blockWait: BigNumber;
 };
 
+const newBidListener = (_user: string, _val: string, _amount: BigNumber) => {
+  notification.open({
+    key: `${_user}|${_val}|${_amount}`,
+    message: "New Bid",
+    description: `User: ${_user} | Value: ${ethers.utils.formatEther(
+      _amount
+    )} NFT | Profile: ${_val}`,
+  });
+};
+
 function App() {
   const { loading, error, data } = useQuery(GET_BIDS);
   const {
@@ -44,7 +54,6 @@ function App() {
   const [bidsLoading, setBidsLoading] = useState(false);
   const [newBidEvents, setNewBidEvents] = useState<NewBidEvent[]>();
   const [newBidEventsLoading, setNewBidEventsLoading] = useState(false);
-  const [newBidEventsOutdated, setNewBidEventsOutdated] = useState(false);
 
   useEffect(() => {
     if (!loading && !error) {
@@ -60,7 +69,6 @@ function App() {
         const newBidEvents = await profileAuction?.queryFilter(filter);
         setNewBidEvents(newBidEvents);
         setNewBidEventsLoading(false);
-        setNewBidEventsOutdated(false);
       }
     }
   }, [profileAuction]);
@@ -70,20 +78,6 @@ function App() {
       loadNewBidEvents();
     }
   }, [profileAuction, loadNewBidEvents]);
-
-  const newBidListener = useCallback(
-    (_user: string, _val: string, _amount: BigNumber) => {
-      notification.open({
-        key: `${_user}|${_val}|${_amount}`,
-        message: "New Bid",
-        description: `User: ${_user} | Value: ${ethers.utils.formatEther(
-          _amount
-        )} NFT | Profile: ${_val}`,
-      });
-      setNewBidEventsOutdated(true);
-    },
-    []
-  );
 
   useEffect(() => {
     const async = async () => {
@@ -168,6 +162,7 @@ function App() {
             parseEther(allowance || "").sub(parseEther(nftTokenBid || ""))
           )
         );
+        loadNewBidEvents();
       } catch (e: any) {
         console.log(e.message);
       }
@@ -272,14 +267,6 @@ function App() {
         )}
       </div>
       <div className="p-3">
-        <Button
-          type="primary"
-          disabled={!newBidEventsOutdated}
-          loading={newBidEventsLoading}
-          onClick={loadNewBidEvents}
-        >
-          Reload NewBid Events
-        </Button>
         <Table
           className="pt-3"
           pagination={{ defaultPageSize: 10 }}
