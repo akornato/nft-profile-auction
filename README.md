@@ -1,75 +1,26 @@
-# @project/react-app
+# NFT Profile Auction
 
-This package is a fork of the default app built with [Create React App](https://github.com/facebook/create-react-app).
+This dapp provides an interface for the [ProfileAuction ERC721 contract](https://rinkeby.etherscan.io/address/0x7d4dde9418f2c2d2d895c09e81155e1ab08ae236#writeProxyContract)
 
-## Available Scripts
+Users can place bids for untaken NFT.com profiles, e.g `johnny` for `NFT.com/johnny`
 
-In the project directory, you can run:
+The bids are denominated using [NFT.com ERC20 token](https://rinkeby.etherscan.io/address/0x38E5F095e1a4Bb02c87cb56E2b204E00f3bE5f8d#readProxyContract)
 
-### `yarn start`
+Rinkeby testnet deploy: https://nft-profile-auction.vercel.app/
 
-Runs the app in development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Ethers.js
 
-The page will automatically reload if you make changes to the code.<br>
-You will see the build errors and lint warnings in the console.
+[Ethers](https://docs.ethers.io/) library is used to interact with the blockchain.
 
-### `yarn test`
+## Styling
 
-Runs the test watcher in an interactive mode.<br>
-By default, runs tests related to files changed since the last commit.
+[Tailwind](https://tailwindcss.com/) is used for layout, and [Ant Design](https://ant.design/) for UI components.
 
-[Read more about testing.](https://facebook.github.io/create-react-app/docs/running-tests)
+## TypeScript
 
-### `yarn build`
+All code is statically typed with TypeScript.
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Local dev
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
-
-See the React documentation on [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn react-app:eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` the React app at any time. This command will
-remove the single build dependency from your React package.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right
-into your project so you have full control over them. All of the commands except `eject` will still work, but
-they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `yarn build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+1. `yarn`
+2. `yarn start`
