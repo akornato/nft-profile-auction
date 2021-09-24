@@ -107,7 +107,7 @@ function App() {
       }
     };
     async();
-  }, [provider, newBidListener]);
+  }, [provider]);
 
   const getBids = useCallback(async () => {
     setBidsLoading(true);
