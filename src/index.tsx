@@ -6,7 +6,7 @@ import App from "./App";
 // You should replace this url with your own and put it into a .env file
 // See all subgraphs: https://thegraph.com/explorer/
 const client = new ApolloClient({
-  uri: "https://api.studio.thegraph.com/query/9439/nft-profile-auction/0.0.1",
+  uri: "https://api.studio.thegraph.com/query/9439/nft-profile-auction/0.0.2",
   cache: new InMemoryCache(),
 });
 

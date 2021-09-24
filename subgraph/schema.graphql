@@ -1,5 +1,6 @@
 type Bid @entity {
   id: ID!
+  blockNumber: BigInt!
   user: Bytes! # address
   val: String!
   amount: BigInt!

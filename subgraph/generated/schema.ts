@@ -42,6 +42,15 @@ export class Bid extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get blockNumber(): BigInt {
+    let value = this.get("blockNumber");
+    return value.toBigInt();
+  }
+
+  set blockNumber(value: BigInt) {
+    this.set("blockNumber", Value.fromBigInt(value));
+  }
+
   get user(): Bytes {
     let value = this.get("user");
     return value.toBytes();

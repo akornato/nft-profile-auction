@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
-// import { useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { notification } from "antd";
 import { ethers, Contract } from "ethers";
 import { Button, Input, Table } from "antd";
 import { WalletButton } from "./components/WalletButton";
 import { useWeb3Modal } from "./hooks/useWeb3Modal";
 import { addresses, abis } from "./contracts";
-// import { GET_NEW_BIDS } from "./queries/get-new-bids";
+import { GET_BIDS } from "./queries/get-bids";
 
 import type { BigNumber } from "ethers";
 import type { ProfileAuction, NftToken } from "./types";
@@ -22,7 +22,7 @@ type Bid = [BigNumber, BigNumber, string, BigNumber] & {
 };
 
 function App() {
-  // const { loading, error, data } = useQuery(GET_NEW_BIDS);
+  const { loading, error, data } = useQuery(GET_BIDS);
   const {
     provider,
     loadWeb3Modal,
@@ -45,6 +45,12 @@ function App() {
   const [newBidEvents, setNewBidEvents] = useState<NewBidEvent[]>();
   const [newBidEventsLoading, setNewBidEventsLoading] = useState(false);
   const [newBidEventsOutdated, setNewBidEventsOutdated] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !error) {
+      console.log({ bids: data?.bids });
+    }
+  }, [loading, error, data]);
 
   const loadNewBidEvents = useCallback(async () => {
     if (profileAuction) {
@@ -157,6 +163,11 @@ function App() {
             { gasLimit: 300000 }
           );
         await tx.wait();
+        setAllowance(
+          formatEther(
+            parseEther(allowance || "").sub(parseEther(nftTokenBid || ""))
+          )
+        );
       } catch (e: any) {
         console.log(e.message);
       }

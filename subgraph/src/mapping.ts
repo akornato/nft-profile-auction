@@ -1,6 +1,6 @@
-import { BigInt } from "@graphprotocol/graph-ts";
+// import { BigInt } from "@graphprotocol/graph-ts";
 import {
-  ProfileAuction,
+  // ProfileAuction,
   AdminChanged,
   BeaconUpgraded,
   ChangedBidURI,
@@ -60,7 +60,14 @@ export function handleChangedBidURI(event: ChangedBidURI): void {}
 
 export function handleMintedProfile(event: MintedProfile): void {}
 
-export function handleNewBid(event: NewBid): void {}
+export function handleNewBid(event: NewBid): void {
+  let entity = new Bid(event.params._user.toHex() + event.params._val);
+  entity.blockNumber = event.block.number;
+  entity.user = event.params._user;
+  entity.val = event.params._val;
+  entity.amount = event.params._amount;
+  entity.save();
+}
 
 export function handleNewClaimableProfile(event: NewClaimableProfile): void {}
 
