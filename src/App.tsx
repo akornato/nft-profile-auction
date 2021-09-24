@@ -180,6 +180,9 @@ function App() {
               NFT Token Balance: {nftTokenBalance}
             </div>
           )}
+          {allowance && (
+            <div className="pr-3 text-white">Allowance: {allowance}</div>
+          )}
           {providerError && (
             <div className="pr-3 text-red-500">{providerError}</div>
           )}
@@ -207,7 +210,6 @@ function App() {
           >
             Approve Allowance
           </Button>
-          {allowance && <div className="pl-3">Now: {allowance}</div>}
         </div>
       </div>
       <div className="p-3">
