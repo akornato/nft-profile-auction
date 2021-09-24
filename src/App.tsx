@@ -286,7 +286,7 @@ function App() {
           <Table.Column title="Block #" dataIndex="blockNumber" />
           <Table.Column title="NFT tokens" dataIndex="_amount" />
           <Table.Column title="User" dataIndex="_user" />
-          <Table.Column title="Val" dataIndex="_val" />
+          <Table.Column title="Profile" dataIndex="_val" />
         </Table>
       </div>
     </div>
