@@ -14,6 +14,7 @@ export const useWeb3Modal = () => {
     providers.Web3Provider | undefined
   >();
   const [autoLoaded, setAutoLoaded] = useState(false);
+  const [error, setError] = useState<string>();
 
   // Web3Modal also supports many other wallets.
   // You can see other options at https://github.com/Web3Modal/web3modal
@@ -36,8 +37,14 @@ export const useWeb3Modal = () => {
 
   // Open wallet selection modal.
   const loadWeb3Modal = useCallback(async () => {
-    const newProvider = await web3Modal.connect();
-    setProvider(new providers.Web3Provider(newProvider));
+    const newProvider = new providers.Web3Provider(await web3Modal.connect());
+    const network = await newProvider.getNetwork();
+    if (network.name === "rinkeby") {
+      setError("");
+      setProvider(newProvider);
+    } else {
+      setError(`Point your wallet to rinkeby instead of ${network.name}`);
+    }
   }, [web3Modal]);
 
   const logoutOfWeb3Modal = useCallback(
@@ -56,5 +63,5 @@ export const useWeb3Modal = () => {
     }
   }, [autoLoaded, loadWeb3Modal, setAutoLoaded, web3Modal.cachedProvider]);
 
-  return { provider, loadWeb3Modal, logoutOfWeb3Modal };
+  return { provider, loadWeb3Modal, logoutOfWeb3Modal, error };
 };

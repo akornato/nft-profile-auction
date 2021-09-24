@@ -23,7 +23,12 @@ type Bid = [BigNumber, BigNumber, string, BigNumber] & {
 
 function App() {
   // const { loading, error, data } = useQuery(GET_NEW_BIDS);
-  const { provider, loadWeb3Modal, logoutOfWeb3Modal } = useWeb3Modal();
+  const {
+    provider,
+    loadWeb3Modal,
+    logoutOfWeb3Modal,
+    error: providerError,
+  } = useWeb3Modal();
   const [account, setAccount] = useState<string>();
   const [nftToken, setNftToken] = useState<NftToken>();
   const [nftTokenBalance, setNftTokenBalance] = useState<string>();
@@ -168,6 +173,9 @@ function App() {
             <div className="pr-3 text-white">
               NFT Token Balance: {nftTokenBalance}
             </div>
+          )}
+          {providerError && (
+            <div className="pr-3 text-red-500">{providerError}</div>
           )}
           <WalletButton
             provider={provider}
