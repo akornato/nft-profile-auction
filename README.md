@@ -14,7 +14,7 @@ Rinkeby testnet deploy: https://nft-profile-auction.vercel.app/
 
 ## Apollo
 
-[Apollo] codegen provide static typing for the results of [Apollo Client](https://www.apollographql.com/docs/react) queries that hit The Graph.
+Apollo codegen provides static typing for the results of [Apollo Client](https://www.apollographql.com/docs/react) queries that hit The Graph.
 
 ## TypeChain
 
