@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@apollo/client";
 import { notification } from "antd";
 import { ethers, Contract } from "ethers";
@@ -18,16 +18,6 @@ import type {
 
 const { parseEther, formatEther } = ethers.utils;
 
-const newBidListener = (_user: string, _val: string, _amount: BigNumber) => {
-  notification.open({
-    key: `${_user}|${_val}|${_amount}`,
-    message: "New Bid",
-    description: `User: ${_user} | Value: ${ethers.utils.formatEther(
-      _amount
-    )} NFT | Profile: ${_val}`,
-  });
-};
-
 function App() {
   const {
     provider,
@@ -46,19 +36,36 @@ function App() {
   const [profileUriBid, setProfileUriBid] = useState<string>();
   const [submitProfileBidLoading, setSubmitProfileBidLoading] = useState(false);
   const [bidsQueryAddress, setBidsQueryAddress] = useState<string>();
-  const { loading: allBidsLoading, data: allBidsData } = useQuery<GetAllBids>(
-    GET_ALL_BIDS,
-    { skip: !!bidsQueryAddress }
-  );
-  const { loading: bidsByUserLoading, data: bidsByUserData } = useQuery<
-    GetBidsByUser,
-    GetBidsByUserVariables
-  >(GET_BIDS_BY_USER, {
+  const {
+    loading: allBidsLoading,
+    data: allBidsData,
+    refetch: allBidsRefetch,
+  } = useQuery<GetAllBids>(GET_ALL_BIDS, { skip: !!bidsQueryAddress });
+  const {
+    loading: bidsByUserLoading,
+    data: bidsByUserData,
+    refetch: bidsByUserRefetch,
+  } = useQuery<GetBidsByUser, GetBidsByUserVariables>(GET_BIDS_BY_USER, {
     variables: { user: bidsQueryAddress },
     skip: !bidsQueryAddress,
   });
   const bidsLoading = allBidsLoading || bidsByUserLoading;
   const bids = (bidsQueryAddress ? bidsByUserData : allBidsData)?.bids || [];
+
+  const newBidListener = useCallback(
+    (_user: string, _val: string, _amount: BigNumber) => {
+      notification.open({
+        key: `${_user}|${_val}|${_amount}`,
+        message: "New Bid",
+        description: `User: ${_user} | Value: ${ethers.utils.formatEther(
+          _amount
+        )} NFT | Profile: ${_val}`,
+      });
+      allBidsRefetch();
+      bidsByUserRefetch();
+    },
+    [allBidsRefetch, bidsByUserRefetch]
+  );
 
   useEffect(() => {
     const async = async () => {
@@ -88,7 +95,7 @@ function App() {
       }
     };
     async();
-  }, [provider]);
+  }, [provider, newBidListener]);
 
   const approveAllowance = async () => {
     if (provider && nftToken && profileAuction) {
