@@ -6,7 +6,7 @@ dataSources:
     name: ProfileAuction
     network: rinkeby
     source:
-      address: "0xc630104af37873dd4a8ae5ca939557be023e73f3"
+      address: "0x7d4dde9418f2c2d2d895c09e81155e1ab08ae236"
       abi: ProfileAuction
     mapping:
       kind: ethereum/events

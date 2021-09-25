@@ -8,6 +8,18 @@ The bids are denominated using [NFT.com ERC20 token](https://rinkeby.etherscan.i
 
 Rinkeby testnet deploy: https://nft-profile-auction.vercel.app/
 
+## The Graph
+
+[The Graph](https://thegraph.com/docs/developer/quick-start) is used to index `ProfileAuction` contract `NewBid` events.
+
+## Apollo
+
+[Apollo] codegen provide static typing for the results of [Apollo Client](https://www.apollographql.com/docs/react) queries that hit The Graph.
+
+## TypeChain
+
+[Typechain](https://github.com/ethereum-ts/TypeChain) generates TypeScript bindings for `ProfileAuction` and `NftToken` contracts.
+
 ## Ethers.js
 
 [Ethers](https://docs.ethers.io/) library is used to interact with the blockchain.

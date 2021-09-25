@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import { notification } from "antd";
 import { ethers, Contract } from "ethers";
@@ -6,20 +6,17 @@ import { Button, Input, Table } from "antd";
 import { WalletButton } from "./components/WalletButton";
 import { useWeb3Modal } from "./hooks/useWeb3Modal";
 import { addresses, abis } from "./contracts";
-import { GET_BIDS } from "./queries/get-bids";
+import { GET_BIDS_BY_USER, GET_ALL_BIDS } from "./queries/get-bids";
 
 import type { BigNumber } from "ethers";
 import type { ProfileAuction, NftToken } from "./types";
-import type { NewBidEvent } from "./types/ProfileAuction";
+import type { GetAllBids } from "./types-gql/GetAllBids";
+import type {
+  GetBidsByUser,
+  GetBidsByUserVariables,
+} from "./types-gql/GetBidsByUser";
 
 const { parseEther, formatEther } = ethers.utils;
-
-type Bid = [BigNumber, BigNumber, string, BigNumber] & {
-  _nftTokens: BigNumber;
-  _blockMinted: BigNumber;
-  _profileURI: string;
-  _blockWait: BigNumber;
-};
 
 const newBidListener = (_user: string, _val: string, _amount: BigNumber) => {
   notification.open({
@@ -32,7 +29,6 @@ const newBidListener = (_user: string, _val: string, _amount: BigNumber) => {
 };
 
 function App() {
-  const { loading, error, data } = useQuery(GET_BIDS);
   const {
     provider,
     loadWeb3Modal,
@@ -50,34 +46,19 @@ function App() {
   const [profileUriBid, setProfileUriBid] = useState<string>();
   const [submitProfileBidLoading, setSubmitProfileBidLoading] = useState(false);
   const [bidsQueryAddress, setBidsQueryAddress] = useState<string>();
-  const [bids, setBids] = useState<Bid[]>([]);
-  const [bidsLoading, setBidsLoading] = useState(false);
-  const [newBidEvents, setNewBidEvents] = useState<NewBidEvent[]>();
-  const [newBidEventsLoading, setNewBidEventsLoading] = useState(false);
-
-  useEffect(() => {
-    if (!loading && !error) {
-      console.log({ bids: data?.bids });
-    }
-  }, [loading, error, data]);
-
-  const loadNewBidEvents = useCallback(async () => {
-    if (profileAuction) {
-      const filter = profileAuction.filters.NewBid();
-      if (filter) {
-        setNewBidEventsLoading(true);
-        const newBidEvents = await profileAuction?.queryFilter(filter);
-        setNewBidEvents(newBidEvents);
-        setNewBidEventsLoading(false);
-      }
-    }
-  }, [profileAuction]);
-
-  useEffect(() => {
-    if (profileAuction) {
-      loadNewBidEvents();
-    }
-  }, [profileAuction, loadNewBidEvents]);
+  const { loading: allBidsLoading, data: allBidsData } = useQuery<GetAllBids>(
+    GET_ALL_BIDS,
+    { skip: !!bidsQueryAddress }
+  );
+  const { loading: bidsByUserLoading, data: bidsByUserData } = useQuery<
+    GetBidsByUser,
+    GetBidsByUserVariables
+  >(GET_BIDS_BY_USER, {
+    variables: { user: bidsQueryAddress },
+    skip: !bidsQueryAddress,
+  });
+  const bidsLoading = allBidsLoading || bidsByUserLoading;
+  const bids = (bidsQueryAddress ? bidsByUserData : allBidsData)?.bids || [];
 
   useEffect(() => {
     const async = async () => {
@@ -108,13 +89,6 @@ function App() {
     };
     async();
   }, [provider]);
-
-  const getBids = useCallback(async () => {
-    setBidsLoading(true);
-    const bids = await profileAuction?.getBids(bidsQueryAddress || "");
-    setBids(bids || []);
-    setBidsLoading(false);
-  }, [profileAuction, bidsQueryAddress]);
 
   const approveAllowance = async () => {
     if (provider && nftToken && profileAuction) {
@@ -162,7 +136,6 @@ function App() {
             parseEther(allowance || "").sub(parseEther(nftTokenBid || ""))
           )
         );
-        loadNewBidEvents();
       } catch (e: any) {
         console.log(e.message);
       }
@@ -237,56 +210,30 @@ function App() {
         </div>
       </div>
       <div className="p-3">
-        <div className="flex">
-          <Input
-            className="max-w-lg"
-            placeholder="Address"
-            onChange={(event) => setBidsQueryAddress(event.target.value)}
-          />
-          <Button
-            type="primary"
-            disabled={!bidsQueryAddress}
-            onClick={getBids}
-            loading={bidsLoading}
-          >
-            Query Bids
-          </Button>
-        </div>
-        {bids.length > 0 && (
-          <Table
-            className="pt-5"
-            pagination={{ defaultPageSize: 10 }}
-            loading={bidsLoading}
-            dataSource={bids?.map(({ _nftTokens, _profileURI }, index) => ({
-              key: index,
-              _nftTokens: formatEther(_nftTokens),
-              _profileURI,
-            }))}
-          >
-            <Table.Column title="NFT tokens" dataIndex="_nftTokens" />
-            <Table.Column title="Profile URI" dataIndex="_profileURI" />
-          </Table>
-        )}
+        <Input
+          className="max-w-lg"
+          placeholder="User filter"
+          onChange={(event) => setBidsQueryAddress(event.target.value)}
+        />
       </div>
       <div className="p-3">
         <Table
-          className="pt-3"
           pagination={{ defaultPageSize: 10 }}
-          loading={newBidEventsLoading}
-          dataSource={newBidEvents
-            ?.map(({ blockNumber, args: { _amount, _user, _val } }, index) => ({
-              key: index,
+          loading={bidsLoading}
+          dataSource={bids
+            .map(({ id, blockNumber, user, amount, val }) => ({
+              key: id,
               blockNumber,
-              _amount: formatEther(_amount),
-              _user,
-              _val,
+              amount: formatEther(amount),
+              user,
+              val,
             }))
             .sort(({ blockNumber: a }, { blockNumber: b }) => b - a)}
         >
           <Table.Column title="Block #" dataIndex="blockNumber" />
-          <Table.Column title="NFT tokens" dataIndex="_amount" />
-          <Table.Column title="User" dataIndex="_user" />
-          <Table.Column title="Profile" dataIndex="_val" />
+          <Table.Column title="NFT tokens" dataIndex="amount" />
+          <Table.Column title="User" dataIndex="user" />
+          <Table.Column title="Profile" dataIndex="val" />
         </Table>
       </div>
     </div>
