@@ -1,10 +1,10 @@
 # NFT Profile Auction
 
-This dapp provides an interface for the [ProfileAuction ERC721 contract](https://rinkeby.etherscan.io/address/0x7d4dde9418f2c2d2d895c09e81155e1ab08ae236#writeProxyContract)
+This dapp provides an interface for the [ProfileAuction](https://rinkeby.etherscan.io/address/0x7d4dde9418f2c2d2d895c09e81155e1ab08ae236#writeProxyContract) ERC721 contract.
 
 Users can place bids for untaken NFT.com profiles, e.g `johnny` for `NFT.com/johnny`
 
-The bids are denominated using [NFT.com ERC20 token](https://rinkeby.etherscan.io/address/0x38E5F095e1a4Bb02c87cb56E2b204E00f3bE5f8d#readProxyContract)
+The bids are denominated using [NftToken](https://rinkeby.etherscan.io/address/0x38E5F095e1a4Bb02c87cb56E2b204E00f3bE5f8d#readProxyContract) ERC20 token.
 
 Rinkeby testnet deploy: https://nft-profile-auction.vercel.app/
 
@@ -27,10 +27,6 @@ Apollo codegen provides static typing for the results of [Apollo Client](https:/
 ## Styling
 
 [Tailwind](https://tailwindcss.com/) is used for layout, and [Ant Design](https://ant.design/) for UI components.
-
-## TypeScript
-
-All code is statically typed with TypeScript.
 
 ## Local dev
 
