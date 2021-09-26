@@ -3,12 +3,6 @@ import { providers } from "ethers";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import Web3Modal from "web3modal";
 
-// Enter a valid infura key here to avoid being rate limited
-// You can get a key for free at https://infura.io/register
-const INFURA_ID = "INVALID_INFURA_KEY";
-
-const NETWORK = "rinkeby";
-
 export const useWeb3Modal = () => {
   const [provider, setProvider] = useState<
     providers.Web3Provider | undefined
@@ -21,13 +15,13 @@ export const useWeb3Modal = () => {
   const web3Modal = useMemo(
     () =>
       new Web3Modal({
-        network: NETWORK,
+        network: "rinkeby",
         cacheProvider: true,
         providerOptions: {
           walletconnect: {
             package: WalletConnectProvider,
             options: {
-              infuraId: INFURA_ID,
+              infuraId: process.env.REACT_APP_INFURA_ID,
             },
           },
         },

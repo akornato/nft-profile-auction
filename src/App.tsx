@@ -117,7 +117,6 @@ function App() {
 
   const submitProfileBid = async () => {
     if (provider && profileAuction) {
-      await provider.send("eth_requestAccounts", []);
       const signer = provider.getSigner();
       setSubmitProfileBidLoading(true);
       try {
@@ -135,7 +134,7 @@ function App() {
           .submitProfileBid(
             parseEther(nftTokenBid || ""),
             profileUriBid || "",
-            { gasLimit: 300000 }
+            { gasLimit: 500000 }
           );
         await tx.wait();
         setAllowance(
