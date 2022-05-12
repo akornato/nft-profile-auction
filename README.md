@@ -1,6 +1,6 @@
 # NFT Profile Auction
 
-This dapp provides an interface for the [ProfileAuction](https://rinkeby.etherscan.io/address/0x7d4dde9418f2c2d2d895c09e81155e1ab08ae236#writeProxyContract) ERC721 contract.
+This dapp provides an interface for the [ProfileAuction](https://rinkeby.etherscan.io/address/0x7d4dde9418f2c2d2d895c09e81155e1ab08ae236#writeProxyContract) contract.
 
 Users can place bids for untaken NFT.com profiles, e.g `johnny` for `NFT.com/johnny`
 
